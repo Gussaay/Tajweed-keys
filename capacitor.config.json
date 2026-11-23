@@ -1,0 +1,11 @@
+{
+  "appId": "com.tajweed.keys",
+  "appName": "مفاتيح التجويد",
+  "webDir": "dist",
+  "server": { "androidScheme": "https" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 1000, "launchAutoHide": true, "backgroundColor": "#0B5D4F", "showSpinner": false },
+    "StatusBar": { "style": "DARK", "backgroundColor": "#094E43" }
+  },
+  "android": { "adjustMarginsForEdgeToEdge": "force" }
+}

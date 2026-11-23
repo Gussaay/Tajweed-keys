@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0E7A68"/><stop offset="1" stop-color="#073F36"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- open mushaf -->
+  <path d="M256 168 C214 138 156 132 112 140 V352 C156 344 214 350 256 380 Z" fill="#F6F1E3"/>
+  <path d="M256 168 C298 138 356 132 400 140 V352 C356 344 298 350 256 380 Z" fill="#FFFDF6"/>
+  <path d="M256 168 V380" stroke="#C9B98E" stroke-width="5"/>
+  <g stroke="#9DB7AE" stroke-width="7" stroke-linecap="round">
+    <path d="M140 190 C170 186 205 190 232 202"/><path d="M140 222 C170 218 205 222 232 234"/><path d="M140 254 C170 250 205 254 232 266"/>
+    <path d="M280 202 C307 190 342 186 372 190"/><path d="M280 234 C307 222 342 218 372 222"/>
+  </g>
+  <!-- gold key -->
+  <g fill="#E3B35A" stroke="#A8761D" stroke-width="6">
+    <circle cx="330" cy="300" r="42"/>
+    <path d="M300 330 L212 418 L236 442 L252 426 L268 442 L288 422 L272 406 L324 354 Z" stroke-linejoin="round"/>
+  </g>
+  <circle cx="330" cy="300" r="16" fill="#073F36"/>
+</svg>
