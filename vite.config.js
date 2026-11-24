@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import pkg from './package.json' with { type: 'json' };
 
-// BASE: '/' for the Android app and a custom domain; GitHub Pages serves the
-// site under /Tajweed-keys/, so the Pages workflow sets VITE_BASE to that.
+// BASE: '/' for Firebase Hosting and the Android app. A host that serves the
+// site under a sub-path (e.g. GitHub Pages) can set VITE_BASE.
 const base = process.env.VITE_BASE || '/';
 
 export default defineConfig({

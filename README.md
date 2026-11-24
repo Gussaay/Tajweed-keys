@@ -7,7 +7,7 @@ Capacitor 7 + PWA (vite-plugin-pwa), with a bottom tab bar, a coloured app bar, 
 light/dark mode. All content is bundled, so the app works fully offline.
 
 - **Download the APK:** https://github.com/Gussaay/Tajweed-keys/releases/latest/download/tajweed-keys.apk
-- **Web app:** https://gussaay.github.io/Tajweed-keys/
+- **Web app:** https://tajweed-24716.web.app (Firebase Hosting, project `tajweed-24716`)
 
 ## Study modes
 
@@ -50,6 +50,7 @@ npx @capacitor/assets generate --android   # regenerate native icons/splash from
 npm run mobile:sync      # build + copy web assets into android/
 npm run mobile:open      # open android/ in Android Studio
 npm run mobile:build:apk # debug APK (android/app/build/outputs/apk/debug/)
+npm run deploy:web       # build + firebase deploy --only hosting (tajweed-24716.web.app)
 ```
 
 Android builds need JDK 21 (Android Studio's bundled JBR works).
@@ -59,13 +60,20 @@ Android builds need JDK 21 (Android Studio's bundled JBR works).
 `.github/workflows/build.yml` runs on every push to `main`:
 
 1. builds the APK and publishes it as a GitHub Release (`releases/latest/download/tajweed-keys.apk`);
-2. builds the web app with `VITE_BASE=/Tajweed-keys/` and deploys it to GitHub Pages.
-   If the Pages job fails the first time, set **Settings → Pages → Source: GitHub Actions** once.
+2. builds the web app and deploys it to Firebase Hosting (`tajweed-24716`). This needs the
+   repository secret `FIREBASE_SERVICE_ACCOUNT_TAJWEED` (a service-account JSON key of the
+   project); without it the job only prints a warning. Manual deploy: `npx firebase-tools deploy --only hosting`.
+
+## Firebase
+
+Project `tajweed-24716` (Realtime Database in europe-west1). `android/app/google-services.json`
+is the Android app's config (package `com.tajweed.keys`); Capacitor applies the
+google-services Gradle plugin automatically when that file is present.
 
 The CI APK is debug-signed with a fresh key on each runner, so installing a newer
 build over an older one may need an uninstall first. For Play Store / in-place
 updates, add a release keystore as repository secrets and switch the job to
 `assembleRelease` (same approach as Easy Pedia's `deploy.yml`).
 
-The router uses `HashRouter` so the same build works on GitHub Pages and inside the
+The router uses `HashRouter` so the same build works on any static host and inside the
 Android WebView without server rewrites.

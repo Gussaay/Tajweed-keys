@@ -4,9 +4,10 @@ name: Build web and Android APK
 #   1. builds the Android APK and publishes it as a GitHub Release, so there is
 #      always a permanent download link:
 #        https://github.com/Gussaay/Tajweed-keys/releases/latest/download/tajweed-keys.apk
-#   2. publishes the web app on GitHub Pages:
-#        https://gussaay.github.io/Tajweed-keys/
-#      (one-time: Settings > Pages > Source: "GitHub Actions").
+#   2. deploys the web app to Firebase Hosting (project tajweed-24716):
+#        https://tajweed-24716.web.app
+#      Firebase Hosting refuses .apk files on the free Spark plan, so the APK
+#      stays on GitHub Releases.
 
 on:
   push:
@@ -15,62 +16,11 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  apk:
-    name: Android APK
+  web:
+    name: Web (Firebase Hosting)
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - name: Setup Java 21 (required by Capacitor 7)
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: gradle
-      - run: npm ci
-      - run: npm test
-      - name: Build web assets and copy them into android/
-        run: npm run build && npx cap sync android
-      - name: Version from the run number
-        run: |
-          sed -i -e "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" android/app/build.gradle
-          sed -i -e "s/versionName \".*\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
-      - name: Build APK
-        working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
-          cp app/build/outputs/apk/debug/app-debug.apk ../tajweed-keys.apk
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tajweed-keys-apk
-          path: tajweed-keys.apk
-      - name: Publish release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: مفاتيح التجويد 1.0.${{ github.run_number }}
-          body: Android APK built from ${{ github.sha }}. Download tajweed-keys.apk and open it on the phone to install.
-          files: tajweed-keys.apk
-          make_latest: true
-
-  pages:
-    name: Web (GitHub Pages)
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TAJWEED }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -78,15 +28,19 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - name: Build for /<repo>/
-        run: npm run build
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/
-      - uses: actions/configure-pages@v5
+      - run: npm run build
+      # Secret FIREBASE_SERVICE_ACCOUNT_TAJWEED: the JSON key of a service
+      # account of project tajweed-24716 (Firebase console > Project settings >
+      # Service accounts > Generate new private key), or the one that
+      # `firebase init hosting:github` creates.
+      - name: Deploy to Firebase Hosting
+        if: env.FIREBASE_SERVICE_ACCOUNT != ''
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          enablement: true
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-      - id: deploy
-        uses: actions/deploy-pages@v4
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TAJWEED }}
+          projectId: tajweed-24716
+          channelId: live
+      - name: Secret missing
+        if: env.FIREBASE_SERVICE_ACCOUNT == ''
+        run: echo "::warning::Add the FIREBASE_SERVICE_ACCOUNT_TAJWEED secret to deploy to https://tajweed-24716.web.app"

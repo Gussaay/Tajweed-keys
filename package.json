@@ -13,7 +13,8 @@
     "mobile:sync": "npm run build && npx cap sync android",
     "mobile:android": "npx cap run android",
     "mobile:open": "npx cap open android",
-    "mobile:build:apk": "npm run mobile:sync && cd android && ./gradlew assembleDebug && cd .."
+    "mobile:build:apk": "npm run mobile:sync && cd android && ./gradlew assembleDebug && cd ..",
+    "deploy:web": "npm run build && npx firebase-tools deploy --only hosting"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.0",
