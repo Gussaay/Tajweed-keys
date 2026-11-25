@@ -29,4 +29,5 @@ export const FIREBASE_CONFIG = {
 
 // OAuth "Web client" ID (Firebase > Authentication > Google > Web SDK
 // configuration). Needed only for Google sign-in inside the Android app.
-export const GOOGLE_WEB_CLIENT_ID = env.VITE_GOOGLE_WEB_CLIENT_ID || '';
+export const GOOGLE_WEB_CLIENT_ID =
+  env.VITE_GOOGLE_WEB_CLIENT_ID || '707614138744-nqnqdnqrtel0jnl37hol6sb0agdhigsf.apps.googleusercontent.com';
