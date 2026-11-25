@@ -19,8 +19,28 @@ const ZONES = {
   'aqsa-halq': { d: 'M240 260 L262 260 L264 296 L242 296 Z', at: [252, 278], lb: [L, 285], name: 'أقصى الحلق' },
 };
 
-export default function Mouth({ hl = [], marks = {}, small = false }) {
-  const on = hl.filter((z) => ZONES[z]);
+// Larger zones first, so thin ones drawn later stay tappable.
+const HIT_ORDER = ['khayshum', 'hanak', 'wasat-lisan', 'aqsa-lisan', 'hafa-lisan', 'taraf-lisan', 'aqsa-halq', 'wasat-halq', 'adna-halq', 'jawf', 'asnan', 'shafatan'];
+
+// Letters that come out at (or use) each zone, for the tappable diagram.
+export const ZONE_LETTERS = {
+  jawf: { l: 'ا و ي', d: 'حروف المد الثلاثة: الألف، والواو الساكنة المضموم ما قبلها، والياء الساكنة المكسور ما قبلها', madd: true },
+  'aqsa-halq': { l: 'ء ه', d: 'الهمزة والهاء' },
+  'wasat-halq': { l: 'ع ح', d: 'العين والحاء' },
+  'adna-halq': { l: 'غ خ', d: 'الغين والخاء' },
+  'aqsa-lisan': { l: 'ق ك', d: 'القاف (أقصى اللسان مع ما فوقه من الحنك الرخو) والكاف (أسفل منها قليلًا)' },
+  'wasat-lisan': { l: 'ج ش ي', d: 'وسط اللسان مع ما يحاذيه من الحنك الأعلى: الجيم والشين والياء غير المدية' },
+  'hafa-lisan': { l: 'ض ل', d: 'الضاد: إحدى حافتي اللسان مع الأضراس العليا. اللام: أدنى الحافتين إلى منتهى طرف اللسان' },
+  'taraf-lisan': { l: 'ن ر ط د ت ص س ز ظ ذ ث', d: 'النون والراء، والطاء والدال والتاء مع أصول الثنايا العليا، والصاد والسين والزاي فوق الثنايا السفلى، والظاء والذال والثاء مع أطراف الثنايا العليا' },
+  asnan: { l: 'ف ظ ذ ث', d: 'الثنايا العليا تشارك في الفاء (مع باطن الشفة السفلى)، وأطرافها في الظاء والذال والثاء' },
+  shafatan: { l: 'ف ب م و', d: 'الفاء: باطن الشفة السفلى مع أطراف الثنايا العليا. الباء والميم: بانطباق الشفتين. الواو غير المدية: بانفتاحهما' },
+  khayshum: { l: 'ن م', d: 'مخرج الغنة، صفة لازمة للنون والميم' },
+  hanak: { l: 'ق ك ج ش ي ل ن ر', d: 'يلتقي به اللسان في حروف أقصى اللسان ووسطه وطرفه' },
+};
+
+export default function Mouth({ hl = [], marks = {}, small = false, sel = null, onPick = null }) {
+  const on = hl.filter((z) => ZONES[z] && z !== sel);
+  const shown = sel && ZONES[sel] ? [...on, sel] : on;
   return (
     <svg viewBox="-24 20 620 336" className="mouth" style={{ maxHeight: small ? 220 : 320 }} role="img"
       aria-label={on.map((z) => marks[z] || ZONES[z].name).join('، ') || 'جهاز النطق'}>
@@ -43,12 +63,17 @@ export default function Mouth({ hl = [], marks = {}, small = false }) {
       {/* vocal folds */}
       <path className="m-fold" d="M242 300 L264 296" />
       {on.map((k) => <path key={k} d={ZONES[k].d} className="m-hl" />)}
-      {on.map((k) => {
-        const z = ZONES[k], t = marks[k] || z.name, w = Math.max(44, t.length * 13.5 + 26);
+      {sel && ZONES[sel] && <path d={ZONES[sel].d} className="m-hl m-sel" />}
+      {onPick && HIT_ORDER.map((k) => [k, ZONES[k]]).map(([k, z]) => (
+        <path key={`h${k}`} d={z.d} className="m-hit" role="button" tabIndex={0} aria-label={z.name}
+          onClick={() => onPick(k)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onPick(k)} />
+      ))}
+      {shown.map((k) => {
+        const z = ZONES[k], t = (k !== sel && marks[k]) || z.name, w = Math.max(44, t.length * 13.5 + 26);
         const [x, y] = z.lb, below = y === B;
         const ex = below ? x : x === R ? x - w / 2 : x + w / 2, ey = below ? y - 18 : y;
         return (
-          <g key={`l${k}`}>
+          <g key={`l${k}`} className={k === sel ? 'm-picked' : ''}>
             <path className="m-lead" d={`M${z.at[0]} ${z.at[1]} L${ex} ${ey}`} />
             <circle className="m-dot" cx={z.at[0]} cy={z.at[1]} r="3" />
             <rect className="m-pill" x={x - w / 2} y={y - 18} width={w} height="36" rx="18" />

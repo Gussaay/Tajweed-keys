@@ -139,13 +139,12 @@ jobs:
         env:
           VITE_APP_VERSION: ${{ needs.apk.outputs.version }}
         run: npm run build
-      # The installed apps download this zip and swap their web layer. The
-      # illustrations (8 MB) stay out of it; the app loads any it lacks from
-      # the website. Zipped before anything else is added to dist/.
+      # The installed apps download this zip and swap their web layer.
+      # Zipped before anything else is added to dist/.
       - name: Create the over-the-air bundle
         run: |
           ZIP="update-${VERSION}.zip"
-          (cd dist && zip -qr "../${ZIP}" . -x 'figs/*')
+          (cd dist && zip -qr "../${ZIP}" .)
           CHECKSUM=$(sha256sum "${ZIP}" | cut -d' ' -f1)
           mkdir -p dist/latest
           mv "${ZIP}" dist/latest/

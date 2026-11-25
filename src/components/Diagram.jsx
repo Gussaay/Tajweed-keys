@@ -2,7 +2,7 @@
 // by one of a few layouts in a single style. Text may hold <b> and
 // <span class="ayah">. Each diagram replaces one scanned figure (key = file).
 import { Html } from './ui';
-import Mouth from './Mouth';
+import { LetterChips, MouthPicker, MaddMeter, MiniMadd } from './Interactive';
 
 const H = ({ html, as = 'div', className = '' }) => (html ? <Html as={as} className={className} html={html} /> : null);
 
@@ -65,8 +65,9 @@ function Body({ d }) {
         <div className="dg-letters">
           {d.groups.map((g, i) => (
             <div key={i} className="dg-lg">
-              <div className="dg-lchips">{g.l.split(' ').filter(Boolean).map((c, j) => <span key={j}>{c}</span>)}</div>
+              <LetterChips l={g.l} />
               <H className="dg-lg-h" html={g.h} />
+              {g.n && <MiniMadd n={g.n} />}
               <H className="dg-lg-d" html={g.d} />
             </div>
           ))}
@@ -81,10 +82,12 @@ function Body({ d }) {
     case 'mouth':
       return (
         <div className="dg-mouth">
-          <Mouth hl={d.hl} marks={d.marks} />
+          <MouthPicker hl={d.hl} marks={d.marks} />
           {d.rows && <dl className="dg-def">{d.rows.map(([l, v], i) => (<div key={i}><H as="dt" html={l} /><H as="dd" html={v} /></div>))}</dl>}
         </div>
       );
+    case 'madd': // a haraka counter: opts [{l, n}], optional example w
+      return <MaddMeter opts={d.opts} w={d.w} />;
     default:
       return null;
   }

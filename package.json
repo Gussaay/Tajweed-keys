@@ -17,6 +17,7 @@
     "deploy:web": "npm run build && npx firebase-tools deploy --only hosting"
   },
   "dependencies": {
+    "@capacitor-community/text-to-speech": "^6.1.0",
     "@capacitor/android": "^7.4.0",
     "@capacitor/app": "^7.0.0",
     "@capacitor/browser": "^7.0.5",

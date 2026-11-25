@@ -34,12 +34,9 @@ export default defineConfig({
       workbox: {
         // Everything (lessons are bundled) works offline after the first visit.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        // Illustrations are cached as they are opened, not all at install.
-        globIgnores: ['figs/**'],
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [
-          { urlPattern: /\/figs\/.*\.webp$/, handler: 'CacheFirst', options: { cacheName: 'figs', expiration: { maxEntries: 300 } } },
           { urlPattern: /\.pdf$/, handler: 'CacheFirst', options: { cacheName: 'pdf', expiration: { maxEntries: 2 } } },
         ],
       },
