@@ -15,17 +15,16 @@ export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0';
 // eslint-disable-next-line no-undef
 export const BUILD_TIME = typeof __BUILD_TIME__ === 'number' ? __BUILD_TIME__ : 0;
 
-// Firebase project tajweed-24716. A web app's config from the console can
-// override any value through VITE_FIREBASE_* variables.
+// Firebase project tajweed-24716, web app config from the console.
 const env = import.meta.env;
 export const FIREBASE_CONFIG = {
-  apiKey: env.VITE_FIREBASE_API_KEY || 'AIzaSyD8RYYTegw704iliZkFzzQ-QZ2xUAIGWek',
+  apiKey: env.VITE_FIREBASE_API_KEY || 'AIzaSyDtMHxrg_WNE1cWTxAcVnYP2ruaGJU5GkE',
   authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || 'tajweed-24716.firebaseapp.com',
   databaseURL: 'https://tajweed-24716-default-rtdb.europe-west1.firebasedatabase.app',
   projectId: 'tajweed-24716',
   storageBucket: 'tajweed-24716.firebasestorage.app',
   messagingSenderId: '707614138744',
-  ...(env.VITE_FIREBASE_APP_ID ? { appId: env.VITE_FIREBASE_APP_ID } : {}),
+  appId: env.VITE_FIREBASE_APP_ID || '1:707614138744:web:00d684b01eb210d242688d',
 };
 
 // OAuth "Web client" ID (Firebase > Authentication > Google > Web SDK
