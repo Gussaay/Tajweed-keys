@@ -42,15 +42,63 @@ function TfItem({ n, q, ok, a, src, answer, onAnswer }) {
   );
 }
 
+function Paper({ paper }) {
+  const [open, setOpen] = useState({});
+  const [tf, setTf] = useState({});
+  const keys = paper.qs.flatMap((q, qi) => q.items.map((_, i) => `${qi}.${i}`));
+  const showAll = (v) => {
+    setOpen(v ? Object.fromEntries(keys.map((k) => [k, true])) : {});
+    setTf(v ? Object.fromEntries(paper.qs.flatMap((q, qi) => (q.cat === 'tf' ? q.items.map(([, ok], i) => [`${qi}.${i}`, ok]) : []))) : {});
+  };
+  return (
+    <>
+      <div className="card" style={{ '--c': AMBER }}>
+        <h3>{paper.title}</h3>
+        <p className="stat m-0">{paper.marks} · {paper.teacher}</p>
+      </div>
+      <div className="flex gap-2 my-2">
+        <button className="btn" onClick={() => showAll(true)}>أظهر كل الإجابات</button>
+        <button className="btn" onClick={() => showAll(false)}>أخفِ الكل</button>
+      </div>
+      {paper.qs.map((q, qi) => (
+        <section key={qi}>
+          <h3 className="font-ui font-bold text-[18px] mt-5 mb-2" style={{ color: AMBER }}>{q.t} <span className="stat">({q.m})</span></h3>
+          {q.items.map((it, i) => {
+            const k = `${qi}.${i}`;
+            return q.cat === 'tf'
+              ? <TfItem key={k} n={i + 1} q={it[0]} ok={it[1]} a={it[2]} src={paper.src} answer={tf[k]} onAnswer={(v) => setTf((x) => ({ ...x, [k]: v }))} />
+              : <RevealItem key={k} n={i + 1} q={it[0]} a={it[1]} src={paper.src} open={!!open[k]} onToggle={() => setOpen((x) => ({ ...x, [k]: !x[k] }))} />;
+          })}
+        </section>
+      ))}
+    </>
+  );
+}
+
+function Finals({ papers }) {
+  const [pid, setPid] = useStored('final', papers[0].id);
+  const paper = papers.find((p) => p.id === pid) || papers[0];
+  return (
+    <>
+      <div className="flex gap-2 my-2">
+        {papers.map((p) => (
+          <button key={p.id} className="chip" style={{ '--c': AMBER }} aria-pressed={p.id === paper.id} onClick={() => setPid(p.id)}>{p.src}</button>
+        ))}
+      </div>
+      <Paper key={paper.id} paper={paper} />
+    </>
+  );
+}
+
 export default function Past() {
-  const [ptype, setPtype] = useStored('ptype', 'def');
+  const [ptype, setPtype] = useStored('ptype', 'finals');
   const t = PAST.find((x) => x.id === ptype) || PAST[0];
   const [open, setOpen] = useState({});
   const [tf, setTf] = useState({});
   const choose = (id) => { setPtype(id); setOpen({}); setTf({}); };
   const all = (v) => setOpen(v ? Object.fromEntries(t.items.map((_, i) => [i, true])) : {});
   const tfN = Object.keys(tf).length;
-  const tfR = Object.entries(tf).filter(([i, v]) => !!t.items[i]?.[1] === v).length;
+  const tfR = t.kind === 'tf' ? Object.entries(tf).filter(([i, v]) => !!t.items[i]?.[1] === v).length : 0;
 
   return (
     <>
@@ -68,7 +116,7 @@ export default function Past() {
           <Html as="p" className="stat m-0" html={t.desc} />
         </div>
 
-        {t.kind === 'tf' ? (
+        {t.kind === 'paper' ? <Finals papers={t.items} /> : t.kind === 'tf' ? (
           <>
             <div className="flex items-center gap-2 my-2">
               <span className="stat">{tfN ? `صحيح ${arN(tfR)} من ${arN(tfN)}` : `${arN(t.items.length)} عبارة`}</span>

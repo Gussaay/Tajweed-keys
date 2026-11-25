@@ -25,7 +25,7 @@ test('deck puts unknown cards first', () => {
   assert.equal(deck.length, lessons.reduce((n, s) => n + s.flash.length, 0));
   assert.equal(deck[deck.length - 1].k, 'hamz:0');
 });
-test('content is complete: 17 lessons, 7 past-exam types, figures exist', () => {
+test('content is complete: 17 lessons, 7 base past-exam types, figures exist', () => {
   assert.equal(lessons.length, 17);
   for (const s of lessons) for (const [f] of s.figs || []) assert.ok(fs.existsSync(new URL('../../public/figs/' + f, import.meta.url)), f);
   assert.equal(new Set(lessons.map((s) => s.id)).size, lessons.length);
@@ -34,5 +34,20 @@ test('content is complete: 17 lessons, 7 past-exam types, figures exist', () => 
   for (const s of lessons) {
     assert.ok(s.flash.length && s.quiz.length && s.essays.length && s.mnemonics.length, s.id);
     for (const [q, opts, ans] of s.quiz) assert.ok(ans >= 0 && ans < opts.length, q);
+  }
+});
+test('final exams: two papers of 7 questions, valid categories', () => {
+  const finals = JSON.parse(fs.readFileSync(new URL('../data/finals.json', import.meta.url)));
+  assert.deepEqual(finals.map((f) => f.id), ['f14', 'f13']);
+  const cats = new Set(['def', 'fill', 'tf', 'harf', 'alaqa', 'extract']);
+  for (const f of finals) {
+    assert.equal(f.qs.length, 7, f.id);
+    for (const q of f.qs) {
+      assert.ok(cats.has(q.cat), q.t);
+      for (const it of q.items) {
+        if (q.cat === 'tf') assert.equal(typeof it[1], 'boolean', it[0]);
+        else assert.ok(it[0] && it[1], it[0]);
+      }
+    }
   }
 });
