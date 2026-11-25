@@ -210,14 +210,19 @@ details.ess .a { padding: 6px 16px 12px; text-align: justify; }
 .dg-wd { font-size: 13px; color: var(--muted); font-family: 'Cairo',sans-serif; }
 .dg-mouth { display: grid; gap: 10px; }
 .mouth { width: 100%; }
-.mouth .m-skin { fill: #f6e3d3; stroke: #c9a68c; stroke-width: 1.5; }
-.mouth .m-air { fill: #fff7f2; stroke: #d9b9a2; stroke-width: 1; }
-.mouth .m-palate { fill: #e8a7a0; stroke: #c27d76; stroke-width: 1; }
-.mouth .m-tongue { fill: #e47e7a; stroke: #b95550; stroke-width: 1.2; }
-.mouth .m-tooth { fill: #fff; stroke: #aaa; stroke-width: 1; }
-.mouth .m-lip { fill: #d9605c; }
-.mouth .m-hl { fill: #0b5d4f; fill-opacity: .55; stroke: #0b5d4f; stroke-width: 2; }
-.mouth .m-lbl { font-family: 'Cairo',sans-serif; font-weight: 800; font-size: 12px; fill: #0b3d34; paint-order: stroke; stroke: #fff; stroke-width: 3px; }
+.mouth .m-skin { fill: #f7e6d8; stroke: #c9a68c; stroke-width: 1.5; }
+.mouth .m-air { fill: #fffaf6; stroke: #dcc0aa; stroke-width: 1; }
+.mouth .m-palate { fill: #e9b1a9; stroke: #c27d76; stroke-width: 1; }
+.mouth .m-palate.soft { fill: #f1c5bf; }
+.mouth .m-tongue { fill: #e58b85; stroke: #b95550; stroke-width: 1.2; }
+.mouth .m-tooth { fill: #fff; stroke: #b9b2aa; stroke-width: 1; }
+.mouth .m-lip { fill: #d96b66; }
+.mouth .m-fold { stroke: #b95550; stroke-width: 3; stroke-linecap: round; }
+.mouth .m-hl { fill: #0f8a73; fill-opacity: .5; stroke: #0b5d4f; stroke-width: 1.6; }
+.mouth .m-lead { stroke: #0b5d4f; stroke-width: 1.6; fill: none; }
+.mouth .m-dot { fill: #0b5d4f; }
+.mouth .m-pill { fill: #0b5d4f; }
+.mouth .m-lbl { font-family: 'Cairo',sans-serif; font-weight: 800; font-size: 22px; fill: #fff; }
 .dg.compact .dg-body { max-height: 260px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 75%, transparent); mask-image: linear-gradient(#000 75%, transparent); }
 @media (max-width: 520px) { .dg-compare { grid-template-columns: 1fr; } .dg-def > div { grid-template-columns: 1fr; gap: 2px; } }
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
