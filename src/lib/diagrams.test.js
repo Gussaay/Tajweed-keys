@@ -8,6 +8,10 @@ const TYPES = { def: 'rows', list: 'items', table: 'rows', compare: 'cols', tree
 const ZONES = ['khayshum', 'hanak', 'jawf', 'shafatan', 'asnan', 'taraf-lisan', 'wasat-lisan', 'aqsa-lisan', 'hafa-lisan', 'adna-halq', 'wasat-halq', 'aqsa-halq'];
 const figs = new Set(L.flatMap((s) => (s.figs || []).map((f) => f[0])));
 
+test('every figure has been redrawn', () => {
+  for (const f of figs) assert.ok(D[f], `${f}: no diagram`);
+});
+
 test('every diagram redraws a real figure and is well formed', () => {
   for (const [k, d] of Object.entries(D)) {
     assert.ok(figs.has(k) && existsSync(new URL(`../../public/figs/${k}`, import.meta.url)), `${k}: no such figure`);
