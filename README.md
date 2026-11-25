@@ -77,3 +77,17 @@ updates, add a release keystore as repository secrets and switch the job to
 
 The router uses `HashRouter` so the same build works on any static host and inside the
 Android WebView without server rewrites.
+
+## Online content, accounts and updates
+
+- **Content** ships inside the app (src/data/*.json) and can be replaced online:
+  an admin publishes from *Account > Admin*, and apps save it for offline use.
+  The first account to press "make this account admin" becomes the admin.
+- **Sign-in** (Firebase Auth: email/password, Google) syncs each user's progress
+  to `users/<uid>/progress`. Rules: `database.rules.json`.
+- **Updates**: every push publishes an over-the-air web bundle
+  (`/latest/update.json`) that installed APKs apply by themselves, and
+  `/native-version.json`, which makes older APKs offer the new APK.
+  Bump `MIN_NATIVE_BUILD` in the workflow when a native plugin changes.
+- **Signing**: add `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` secrets so
+  every APK carries the same key and installs over the previous one.

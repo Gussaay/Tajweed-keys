@@ -38,3 +38,24 @@ export function buildDeck(lessons, known, rand = Math.random) {
   );
   return shuffle(all, rand).sort((a, b) => (known[a.k] ? 1 : 0) - (known[b.k] ? 1 : 0));
 }
+
+// "1.0.10" > "1.0.9": compares dotted versions number by number.
+export function isNewer(a, b) {
+  const pa = String(a || '').split('.').map(Number);
+  const pb = String(b || '').split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const x = pa[i] || 0, y = pb[i] || 0;
+    if (x !== y) return x > y;
+  }
+  return false;
+}
+
+// Progress merge on sign-in: the account fills what this phone lacks;
+// known cards are combined and best scores keep the higher one.
+export function mergeValue(key, local, remote) {
+  if (local === undefined) return remote;
+  if (remote === undefined) return local;
+  if (key === 'known' && local && remote && typeof local === 'object') return { ...remote, ...local };
+  if (key.startsWith('best_') && typeof local === 'number' && typeof remote === 'number') return Math.max(local, remote);
+  return local;
+}

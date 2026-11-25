@@ -1,3 +1,4 @@
+import { SITE_URL } from '../config';
 // Illustrations from the course material: a thumbnail grid that opens a
 // full-screen viewer (tap the sides or swipe to move, tap the X to close).
 import { useEffect, useState } from 'react';
@@ -5,6 +6,15 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { arN } from '../lib/util';
 
 export const figSrc = (name) => `${import.meta.env.BASE_URL}figs/${name}`;
+// Over-the-air updates leave the illustrations out of the download (they are
+// 8 MB). If the running bundle lacks one, it is loaded from the website instead.
+export const figFallback = (name) => (e) => {
+  const el = e.currentTarget;
+  if (!el.dataset.remote) {
+    el.dataset.remote = '1';
+    el.src = `${SITE_URL}/figs/${name}`;
+  }
+};
 
 export function Lightbox({ items, index, onClose, onIndex }) {
   const [x0, setX0] = useState(null);
@@ -29,7 +39,7 @@ export function Lightbox({ items, index, onClose, onIndex }) {
         <span className="font-ui text-sm flex-1 min-w-0 truncate">{tag ? `${tag} · ` : ''}{arN(index + 1)} / {arN(items.length)}</span>
       </div>
       <div className="flex-1 min-h-0 flex items-center justify-center px-2 relative">
-        <img src={figSrc(name)} alt={cap} className="max-h-full max-w-full object-contain rounded-lg bg-white" />
+        <img src={figSrc(name)} onError={figFallback(name)} alt={cap} className="max-h-full max-w-full object-contain rounded-lg bg-white" />
         <button className="absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white" onClick={() => go(-1)} aria-label="السابق"><ChevronRight size={26} /></button>
         <button className="absolute left-1 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white" onClick={() => go(1)} aria-label="التالي"><ChevronLeft size={26} /></button>
       </div>
@@ -47,7 +57,7 @@ export function FigureGrid({ items }) {
         {items.map(([name, cap], i) => (
           <button key={name} onClick={() => setOpen(i)} className="text-right rounded-xl overflow-hidden border transition active:scale-[0.98]" style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}>
             <span className="block aspect-[4/3] bg-white">
-              <img src={figSrc(name)} alt="" loading="lazy" className="w-full h-full object-contain" />
+              <img src={figSrc(name)} onError={figFallback(name)} alt="" loading="lazy" className="w-full h-full object-contain" />
             </span>
             <span className="block px-2 py-1.5 text-[12.5px] leading-snug font-ui line-clamp-2">{cap}</span>
           </button>

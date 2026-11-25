@@ -45,5 +45,8 @@ export default defineConfig({
       },
     }),
   ],
-  define: { 'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version) },
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.VITE_APP_VERSION || pkg.version),
+    __BUILD_TIME__: JSON.stringify(Date.now()),
+  },
 });

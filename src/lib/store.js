@@ -1,7 +1,10 @@
 // localStorage with a prefix; never throws (private mode, blocked storage).
+// Writes are announced to listeners so progress can be synced to the account.
 import { useEffect, useState } from 'react';
 
-const PREFIX = 'tj_';
+export const PREFIX = 'tj_';
+const listeners = new Set();
+
 export const store = {
   get(k, d) {
     try {
@@ -11,10 +14,26 @@ export const store = {
       return d;
     }
   },
-  set(k, v) {
+  set(k, v, { silent = false } = {}) {
     try {
-      localStorage.setItem(PREFIX + k, JSON.stringify(v));
-    } catch {}
+      const json = JSON.stringify(v);
+      if (localStorage.getItem(PREFIX + k) === json) return;
+      localStorage.setItem(PREFIX + k, json);
+    } catch {
+      return;
+    }
+    if (!silent) listeners.forEach((l) => l(k));
+  },
+  keys() {
+    try {
+      return Object.keys(localStorage).filter((k) => k.startsWith(PREFIX)).map((k) => k.slice(PREFIX.length));
+    } catch {
+      return [];
+    }
+  },
+  onChange(l) {
+    listeners.add(l);
+    return () => listeners.delete(l);
   },
 };
 

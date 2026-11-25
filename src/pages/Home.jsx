@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronLeft, ClipboardList, FileDown, Image, KeyRound, Layers, ListChecks, PenLine } from 'lucide-react';
+import { BookOpen, ChevronLeft, CircleUserRound, ClipboardList, FileDown, Image, KeyRound, Layers, ListChecks, PenLine } from 'lucide-react';
 import { LESSONS, MODES, PAST } from '../data';
 import { store } from '../lib/store';
 import { arN } from '../lib/util';
@@ -38,7 +38,12 @@ export default function Home() {
       <header className="bg-brand-700 text-white pt-safe">
         <div className="max-w-3xl mx-auto flex items-center justify-between px-3 py-2">
           <span className="font-display text-2xl font-bold px-1">مفاتيح التجويد</span>
-          <ThemeButton />
+          <div className="flex items-center">
+            <button className="p-2 rounded-full hover:bg-white/10" aria-label="الحساب والتحديثات" onClick={() => navigate('/account')}>
+              <CircleUserRound size={22} />
+            </button>
+            <ThemeButton />
+          </div>
         </div>
       </header>
       <main className="max-w-3xl mx-auto px-4 pt-3 pb-28 space-y-4">

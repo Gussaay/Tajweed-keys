@@ -1,13 +1,16 @@
 name: Build web and Android APK
 
 # On every push to main:
-#   1. builds the Android APK and publishes it as a GitHub Release, so there is
-#      always a permanent download link:
+#   1. builds the Android APK (versionCode = run number) and publishes it as a
+#      GitHub Release, so there is always a permanent download link:
 #        https://github.com/Gussaay/Tajweed-keys/releases/latest/download/tajweed-keys.apk
-#   2. deploys the web app to Firebase Hosting (project tajweed-24716):
-#        https://tajweed-24716.web.app
-#      Firebase Hosting refuses .apk files on the free Spark plan, so the APK
-#      stays on GitHub Releases.
+#      With the KEYSTORE_* secrets set it is signed with the app's fixed key,
+#      so a new APK installs over the old one. Without them it is debug-signed.
+#   2. deploys the web app to Firebase Hosting (https://tajweed-24716.web.app),
+#      together with:
+#        /latest/update.json + zip  over-the-air update for installed apps
+#        /native-version.json       newest APK, so old apps offer the download
+#   3. deploys the database rules (database.rules.json).
 
 on:
   push:
@@ -22,10 +25,22 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  SITE_URL: https://tajweed-24716.web.app
+  APK_URL: https://github.com/Gussaay/Tajweed-keys/releases/latest/download/tajweed-keys.apk
+  # The oldest APK (versionCode) that can run the current web code. BUMP THIS
+  # to the new run number whenever a native plugin is added or updated; older
+  # APKs then skip over-the-air updates and are offered the new APK instead.
+  MIN_NATIVE_BUILD: 6
+
 jobs:
   apk:
     name: Android APK
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    env:
+      HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,39 +53,81 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
+      - id: v
+        name: Version from the run number
+        run: echo "version=1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
       - run: npm ci
       - run: npm test
       - name: Build web assets and copy them into android/
+        env:
+          VITE_APP_VERSION: ${{ steps.v.outputs.version }}
         run: npm run build && npx cap sync android
-      - name: Version from the run number
+      - name: Set versionCode / versionName
         run: |
           sed -i -e "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" android/app/build.gradle
-          sed -i -e "s/versionName \".*\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
-      - name: Build APK
+          sed -i -e "s/versionName \".*\"/versionName \"${{ steps.v.outputs.version }}\"/" android/app/build.gradle
+
+      # Secrets: KEYSTORE_BASE64 (base64 of a .jks or .p12 keystore),
+      # KEYSTORE_PASSWORD, KEY_ALIAS, and KEY_PASSWORD if it differs.
+      - name: Build signed release APK
+        if: env.HAS_KEYSTORE == 'true'
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          chmod +x gradlew
+          ./gradlew assembleRelease
+          BT=$(ls -d ${ANDROID_HOME}/build-tools/* | sort -V | tail -1)
+          $BT/zipalign -p 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
+          $BT/apksigner sign --ks "$RUNNER_TEMP/release.keystore" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+            --out ../tajweed-keys.apk "$RUNNER_TEMP/aligned.apk"
+          $BT/apksigner verify --print-certs ../tajweed-keys.apk | head -3
+          rm -f "$RUNNER_TEMP/release.keystore"
+      - name: Build debug APK (no keystore secrets yet)
+        if: env.HAS_KEYSTORE != 'true'
         working-directory: android
         run: |
+          echo "::warning::KEYSTORE_BASE64 secret not set - publishing a DEBUG-signed APK (users must uninstall before installing the next one)."
           chmod +x gradlew
           ./gradlew assembleDebug
           cp app/build/outputs/apk/debug/app-debug.apk ../tajweed-keys.apk
+      - name: Create native-version.json
+        run: |
+          cat > native-version.json <<JSON
+          {
+            "versionCode": ${{ github.run_number }},
+            "versionName": "${{ steps.v.outputs.version }}",
+            "url": "${APK_URL}",
+            "signed": ${HAS_KEYSTORE}
+          }
+          JSON
+          cat native-version.json
       - uses: actions/upload-artifact@v4
         with:
           name: tajweed-keys-apk
-          path: tajweed-keys.apk
+          path: |
+            tajweed-keys.apk
+            native-version.json
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: مفاتيح التجويد 1.0.${{ github.run_number }}
+          tag_name: v${{ steps.v.outputs.version }}
+          name: مفاتيح التجويد ${{ steps.v.outputs.version }}
           body: Android APK built from ${{ github.sha }}. Download tajweed-keys.apk and open it on the phone to install.
           files: tajweed-keys.apk
           make_latest: true
 
-
   web:
-    name: Web (Firebase Hosting)
+    name: Web (Firebase Hosting) + over-the-air update
+    needs: apk
     runs-on: ubuntu-latest
     env:
       FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TAJWEED }}
+      VERSION: ${{ needs.apk.outputs.version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -78,11 +135,36 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npm run build
-      # Secret FIREBASE_SERVICE_ACCOUNT_TAJWEED: the JSON key of a service
-      # account of project tajweed-24716 (Firebase console > Project settings >
-      # Service accounts > Generate new private key), or the one that
-      # `firebase init hosting:github` creates.
+      - name: Build web assets
+        env:
+          VITE_APP_VERSION: ${{ needs.apk.outputs.version }}
+        run: npm run build
+      # The installed apps download this zip and swap their web layer. The
+      # illustrations (8 MB) stay out of it; the app loads any it lacks from
+      # the website. Zipped before anything else is added to dist/.
+      - name: Create the over-the-air bundle
+        run: |
+          ZIP="update-${VERSION}.zip"
+          (cd dist && zip -qr "../${ZIP}" . -x 'figs/*')
+          CHECKSUM=$(sha256sum "${ZIP}" | cut -d' ' -f1)
+          mkdir -p dist/latest
+          mv "${ZIP}" dist/latest/
+          cat > dist/latest/update.json <<JSON
+          {
+            "version": "${VERSION}",
+            "url": "${SITE_URL}/latest/${ZIP}",
+            "checksum": "${CHECKSUM}",
+            "minNativeBuild": ${MIN_NATIVE_BUILD},
+            "notes": "$(git log -1 --pretty=%s | sed 's/"/\\"/g')"
+          }
+          JSON
+          cat dist/latest/update.json
+          ls -la dist/latest
+      - uses: actions/download-artifact@v4
+        with:
+          name: tajweed-keys-apk
+          path: apk
+      - run: cp apk/native-version.json dist/native-version.json
       - name: Deploy to Firebase Hosting
         if: env.FIREBASE_SERVICE_ACCOUNT != ''
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -91,6 +173,18 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TAJWEED }}
           projectId: tajweed-24716
           channelId: live
+      # Needs the service account to have a database role (Firebase Realtime
+      # Database Admin). If it does not, paste database.rules.json into
+      # Firebase console > Realtime Database > Rules instead.
+      - name: Deploy database rules
+        if: env.FIREBASE_SERVICE_ACCOUNT != ''
+        continue-on-error: true
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx -y firebase-tools@14 deploy --only database --project tajweed-24716 --non-interactive \
+            || echo "::warning::Database rules were not deployed. Paste database.rules.json in the Firebase console."
+          rm -f "$RUNNER_TEMP/sa.json"
       - name: Secret missing
         if: env.FIREBASE_SERVICE_ACCOUNT == ''
         run: echo "::warning::Add the FIREBASE_SERVICE_ACCOUNT_TAJWEED secret to deploy to https://tajweed-24716.web.app"

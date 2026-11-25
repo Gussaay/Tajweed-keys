@@ -1,7 +1,9 @@
-import LESSONS from './lessons.json';
-import EXTRA from './extra.json';
-import PAST_BASE from './past.json';
-import FINALS from './finals.json';
+import { CONTENT } from './content';
+
+const LESSONS = CONTENT.lessons;
+const EXTRA = CONTENT.extra;
+const PAST_BASE = CONTENT.past;
+const FINALS = CONTENT.finals;
 
 // The two final exams are stored once, as whole papers (finals.json).
 // Their questions are also merged into the matching question-type tabs,

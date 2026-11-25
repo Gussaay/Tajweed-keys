@@ -10,6 +10,8 @@ import Quiz from './pages/Quiz';
 import Essay from './pages/Essay';
 import Past from './pages/Past';
 import Gallery from './pages/Gallery';
+import Account from './pages/Account';
+import UpdateBanner from './components/UpdateBanner';
 
 export default function App() {
   const { pathname } = useLocation();
@@ -26,8 +28,10 @@ export default function App() {
         <Route path="/essay" element={<Essay />} />
         <Route path="/past" element={<Past />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/account" element={<Account />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <UpdateBanner />
       <BottomNav />
     </>
   );
