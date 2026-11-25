@@ -2,7 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { LESSONS, lessonById } from '../data';
 import { Html, Page, TopBar } from '../components/ui';
-import { FigureGrid } from '../components/Figures';
+import { FigureSet } from '../components/Figures';
 
 export default function Lesson() {
   const { id } = useParams();
@@ -10,6 +10,8 @@ export default function Lesson() {
   if (!s) return <Navigate to="/learn" replace />;
   const i = LESSONS.indexOf(s);
   const prev = LESSONS[i - 1], next = LESSONS[i + 1];
+  // Each illustration carries the index of the section it belongs to (-1: overview).
+  const figsFor = (k) => (s.figs || []).filter((f) => (f[2] ?? -1) === k);
 
   return (
     <>
@@ -22,11 +24,14 @@ export default function Lesson() {
           </div>
           <Html className="intro" html={s.intro} />
           <div className="card"><h3>خريطة الدرس</h3><Html className="figure" html={s.diagram} /></div>
-          {s.figs?.length > 0 && (
-            <div className="card"><h3>الرسوم التوضيحية ({s.figs.length.toLocaleString('ar-EG')})</h3><FigureGrid items={s.figs} /></div>
+          {figsFor(-1).length > 0 && (
+            <div className="card"><h3>نظرة عامة بالرسم</h3><FigureSet items={figsFor(-1)} /></div>
           )}
           {s.blocks.map(([t, b], k) => (
-            <div className="card" key={k}><Html as="h3" html={t} /><Html className="scroll" html={b} /></div>
+            <div className="card" key={k}>
+              <Html as="h3" html={t} /><Html className="scroll" html={b} />
+              {figsFor(k).length > 0 && <div className="inline-figs"><FigureSet items={figsFor(k)} /></div>}
+            </div>
           ))}
           {s.ladder && <div className="card"><h3>سُلَّم الوقف الاختياري</h3><Html html={s.ladder} /></div>}
           {s.table && (

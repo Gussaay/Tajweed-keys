@@ -4,6 +4,8 @@ import { SITE_URL } from '../config';
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { arN } from '../lib/util';
+import { DIAGRAMS } from '../data';
+import Diagram from './Diagram';
 
 export const figSrc = (name) => `${import.meta.env.BASE_URL}figs/${name}`;
 // Over-the-air updates leave the illustrations out of the download (they are
@@ -63,6 +65,28 @@ export function FigureGrid({ items }) {
           </button>
         ))}
       </div>
+      {open !== null && <Lightbox items={items} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />}
+    </>
+  );
+}
+
+// Illustrations as they appear inside a lesson: every figure that has been
+// redrawn shows as its diagram (with a link to the original scan); the rest
+// stay as thumbnails.
+export function FigureSet({ items, diagrams = DIAGRAMS }) {
+  const [open, setOpen] = useState(null);
+  if (!items?.length) return null;
+  const drawn = items.filter(([n]) => diagrams[n]);
+  const rest = items.filter(([n]) => !diagrams[n]);
+  return (
+    <>
+      {drawn.map(([name]) => (
+        <div key={name} className="dg-wrap">
+          <Diagram d={diagrams[name]} />
+          <button className="dg-orig" onClick={() => setOpen(items.findIndex(([n]) => n === name))}>عرض الصورة الأصلية</button>
+        </div>
+      ))}
+      {rest.length > 0 && <FigureGrid items={rest} />}
       {open !== null && <Lightbox items={items} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />}
     </>
   );
