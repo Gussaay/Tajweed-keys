@@ -2,15 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { MODES, lessonsFor } from '../data';
 import { Html, Page, TopBar } from '../components/ui';
 import LessonChips, { useLessonSel } from '../components/LessonChips';
+import { useAccess } from '../lib/accessStore';
 import { store } from '../lib/store';
 import { arN, shuffle } from '../lib/util';
 
-const makeQs = (sel) => shuffle(lessonsFor(sel).flatMap((s) => s.quiz.map((q) => ({ q, c: s.color, t: s.title }))));
+const makeQs = (sel, isOpen) => shuffle(lessonsFor(sel, isOpen).flatMap((s) => s.quiz.map((q) => ({ q, c: s.color, t: s.title }))));
 
 export default function Quiz() {
   const [sel, setSel] = useLessonSel();
+  const { isOpen, openKey } = useAccess();
   const [run, setRun] = useState(0);
-  const qs = useMemo(() => makeQs(sel), [sel, run]);
+  const qs = useMemo(() => makeQs(sel, isOpen), [sel, run, openKey]);
   const [qi, setQi] = useState(0);
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState(null);

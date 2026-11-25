@@ -3,11 +3,22 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { LESSONS, lessonById } from '../data';
 import { Html, Page, TopBar } from '../components/ui';
 import { FigureSet } from '../components/Figures';
+import { LockedNotice } from '../components/Lock';
+import { useAccess } from '../lib/accessStore';
 
 export default function Lesson() {
   const { id } = useParams();
   const s = lessonById(id);
+  const { isOpen } = useAccess();
   if (!s) return <Navigate to="/learn" replace />;
+  if (!isOpen(s.id)) {
+    return (
+      <>
+        <TopBar title={`${s.num}. ${s.title}`} />
+        <Page><LockedNotice title={`درس «${s.title}» مقفل`} lesson={s} /></Page>
+      </>
+    );
+  }
   const i = LESSONS.indexOf(s);
   const prev = LESSONS[i - 1], next = LESSONS[i + 1];
   // Each illustration carries the index of the section it belongs to (-1: overview).

@@ -12,7 +12,7 @@ import { store } from './store';
 import { mergeValue } from './util';
 
 // Not progress: the content cache is large and comes from the database anyway.
-const SKIP = new Set(['content', 'sync_at']);
+const SKIP = new Set(['content', 'sync_at', 'acc_cache']);
 const enc = (k) => k.replace(/[.#$/[\]]/g, '_');
 
 let uid = null;

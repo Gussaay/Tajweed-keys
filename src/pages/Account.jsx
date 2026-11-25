@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { MyAccessCard } from '../components/Lock';
 import { LogOut, RefreshCw, ShieldCheck, UploadCloud } from 'lucide-react';
 import { Page, TopBar } from '../components/ui';
-import {
-  authMessage, googleAvailable, isNative, resetPassword, signInEmail, signInWithGoogle, signOut, signUpEmail, useAuth,
-} from '../lib/auth';
+import { isNative, signOut, useAuth } from '../lib/auth';
 import { syncStatus } from '../lib/sync';
 import { contentStatus, claimAdmin, publishContent, publishSection } from '../lib/remoteContent';
 import { applyLiveUpdate, checkForUpdates, updateStatus } from '../lib/updates';
@@ -15,55 +15,6 @@ import { arN } from '../lib/util';
 
 const C = '#0b5d4f';
 const when = (ms) => (ms ? new Date(ms).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }) : '—');
-
-function SignIn() {
-  const [mode, setMode] = useState('in');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [pw, setPw] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState(null);
-  const run = async (fn, ok) => {
-    setBusy(true);
-    setMsg(null);
-    try {
-      await fn();
-      if (ok) setMsg({ ok: true, t: ok });
-    } catch (e) {
-      setMsg({ ok: false, t: authMessage(e) });
-    } finally {
-      setBusy(false);
-    }
-  };
-  const submit = (e) => {
-    e.preventDefault();
-    run(() => (mode === 'in' ? signInEmail(email, pw) : signUpEmail(name, email, pw)));
-  };
-  return (
-    <div className="card" style={{ '--c': C }}>
-      <h3>{mode === 'in' ? 'تسجيل الدخول' : 'إنشاء حساب'}</h3>
-      <p className="stat mb-3">سجلي الدخول ليُحفظ تقدمك (البطاقات، النتائج، إجاباتك المقالية) في حسابك وتجديه على أي جهاز.</p>
-      {googleAvailable && (
-        <button className="btn w-full mb-3" disabled={busy} onClick={() => run(signInWithGoogle)}>الدخول بحساب Google</button>
-      )}
-      <form onSubmit={submit} className="space-y-2 font-ui">
-        {mode === 'up' && <input className="field" placeholder="الاسم" value={name} onChange={(e) => setName(e.target.value)} />}
-        <input className="field" type="email" dir="ltr" placeholder="البريد الإلكتروني" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input className="field" type="password" dir="ltr" placeholder="كلمة المرور" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} value={pw} onChange={(e) => setPw(e.target.value)} />
-        <button className="btn pri w-full" disabled={busy} type="submit">{mode === 'in' ? 'دخول' : 'إنشاء الحساب'}</button>
-      </form>
-      <div className="flex flex-wrap gap-2 mt-3">
-        <button className="btn" onClick={() => { setMode(mode === 'in' ? 'up' : 'in'); setMsg(null); }}>
-          {mode === 'in' ? 'ليس لدي حساب' : 'لدي حساب'}
-        </button>
-        {mode === 'in' && (
-          <button className="btn" disabled={busy || !email} onClick={() => run(() => resetPassword(email), 'أرسلنا رابط تغيير كلمة المرور إلى بريدك.')}>نسيت كلمة المرور</button>
-        )}
-      </div>
-      {msg && <p className="note mt-3" style={{ color: msg.ok ? 'var(--ok)' : 'var(--bad)' }}>{msg.t}</p>}
-    </div>
-  );
-}
 
 function Profile({ user }) {
   const s = useExternal(syncStatus);
@@ -136,7 +87,9 @@ function Admin({ user, admin }) {
   }
   return (
     <div className="card" style={{ '--c': C }}>
-      <h3><ShieldCheck size={18} className="inline ml-1" />الإشراف: نشر المحتوى</h3>
+      <h3><ShieldCheck size={18} className="inline ml-1" />الإشراف</h3>
+      <Link to="/admin" className="btn pri w-full mb-3 block text-center">المستخدمون والاشتراكات والطلبات</Link>
+      <p className="font-ui font-bold">نشر المحتوى</p>
       <p className="stat">ما يُنشر هنا يصل لكل المستخدمين عند اتصالهم، ويبقى معهم دون إنترنت.</p>
       <button className="btn pri mt-2" disabled={busy} onClick={() => run(async () => `نُشر المحتوى (${when(await publishContent())}).`)}>
         <UploadCloud size={16} className="inline ml-1" />انشري المحتوى الحالي
@@ -163,7 +116,8 @@ export default function Account() {
     <>
       <TopBar title="الحساب والتحديثات" sub="تسجيل الدخول، حفظ التقدم، وتحديثات التطبيق والمحتوى" />
       <Page>
-        {!ready ? <p className="stat">…</p> : user ? <Profile user={user} /> : <SignIn />}
+        {ready && user && <Profile user={user} />}
+        {user && <MyAccessCard />}
         <Updates />
         {user && <Admin user={user} admin={admin} />}
       </Page>

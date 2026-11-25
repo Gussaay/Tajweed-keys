@@ -12,10 +12,16 @@ import Past from './pages/Past';
 import Gallery from './pages/Gallery';
 import Account from './pages/Account';
 import UpdateBanner from './components/UpdateBanner';
+import AdminAccess from './pages/AdminAccess';
+import { SignInGate } from './pages/SignIn';
+import { useAuth } from './lib/auth';
 
 export default function App() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  const { user, ready } = useAuth();
+  // Signing in is required: nothing else shows until someone is signed in.
+  if (!ready || !user) return <SignInGate ready={ready} />;
   return (
     <>
       <Routes>
@@ -29,6 +35,7 @@ export default function App() {
         <Route path="/past" element={<Past />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/account" element={<Account />} />
+        <Route path="/admin" element={<AdminAccess />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <UpdateBanner />

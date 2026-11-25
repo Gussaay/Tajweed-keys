@@ -3,13 +3,15 @@ import { Eye, EyeOff } from 'lucide-react';
 import { MODES, lessonsFor } from '../data';
 import { Html, Page, TopBar } from '../components/ui';
 import LessonChips, { useLessonSel } from '../components/LessonChips';
+import { useAccess } from '../lib/accessStore';
 import { shuffle } from '../lib/util';
 
 export default function Mnemonics() {
   const [sel, setSel] = useLessonSel();
+  const { isOpen, openKey } = useAccess();
   const items = useMemo(
-    () => shuffle(lessonsFor(sel).flatMap((s) => s.mnemonics.map((m, i) => ({ id: `${s.id}:${i}`, m, c: s.color, t: s.title })))),
-    [sel],
+    () => shuffle(lessonsFor(sel, isOpen).flatMap((s) => s.mnemonics.map((m, i) => ({ id: `${s.id}:${i}`, m, c: s.color, t: s.title })))),
+    [sel, openKey],
   );
   const [shown, setShown] = useState({});
   const toggle = (id) => setShown((x) => ({ ...x, [id]: !x[id] }));

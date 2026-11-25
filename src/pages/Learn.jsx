@@ -3,8 +3,11 @@ import { ChevronLeft } from 'lucide-react';
 import { LESSONS, MODES } from '../data';
 import { Html, Page, TopBar } from '../components/ui';
 import { arN } from '../lib/util';
+import { useAccess } from '../lib/accessStore';
+import { LockMark } from '../components/Lock';
 
 export default function Learn() {
+  const { isOpen } = useAccess();
   return (
     <>
       <TopBar title={MODES.learn.title} sub={MODES.learn.sub} back={false} />
@@ -17,7 +20,7 @@ export default function Learn() {
                 <span className="block font-ui font-bold text-lg leading-tight">{s.title}</span>
                 <span className="block text-xs opacity-85 font-ui" dir="ltr" style={{ textAlign: 'right' }}>{s.en}</span>
               </span>
-              <ChevronLeft size={22} />
+              {isOpen(s.id) ? <ChevronLeft size={22} /> : <LockMark />}
             </div>
             <Html className="px-4 py-3 text-[15px] line-clamp-3" html={s.intro} />
             <p className="px-4 pb-3 stat">

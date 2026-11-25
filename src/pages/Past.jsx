@@ -3,6 +3,8 @@ import { MODES, PAST } from '../data';
 import { Html, Page, TopBar } from '../components/ui';
 import { useStored } from '../lib/store';
 import { arN } from '../lib/util';
+import { useAccess } from '../lib/accessStore';
+import { LockedNotice } from '../components/Lock';
 
 const AMBER = '#b45309';
 
@@ -99,6 +101,15 @@ export default function Past() {
   const all = (v) => setOpen(v ? Object.fromEntries(t.items.map((_, i) => [i, true])) : {});
   const tfN = Object.keys(tf).length;
   const tfR = t.kind === 'tf' ? Object.entries(tf).filter(([i, v]) => !!t.items[i]?.[1] === v).length : 0;
+  const { acc } = useAccess();
+  if (!acc.full) {
+    return (
+      <>
+        <TopBar title={MODES.past.title} sub={MODES.past.sub} back={false} />
+        <Page><LockedNotice title="الاختبارات السابقة للمشتركات" /></Page>
+      </>
+    );
+  }
 
   return (
     <>

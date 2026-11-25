@@ -3,17 +3,19 @@ import { RotateCcw, Shuffle } from 'lucide-react';
 import { MODES, lessonsFor } from '../data';
 import { Html, Page, TopBar } from '../components/ui';
 import LessonChips, { useLessonSel } from '../components/LessonChips';
+import { useAccess } from '../lib/accessStore';
 import { store } from '../lib/store';
 import { arN, buildDeck, shuffle } from '../lib/util';
 
 export default function Cards() {
   const [sel, setSel] = useLessonSel();
+  const { isOpen, openKey } = useAccess();
   const [known, setKnown] = useState(() => store.get('known', {}));
-  const [deck, setDeck] = useState(() => buildDeck(lessonsFor(sel), known));
+  const [deck, setDeck] = useState(() => buildDeck(lessonsFor(sel, isOpen), known));
   const [i, setI] = useState(0);
   const [flip, setFlip] = useState(false);
-  const rebuild = (kn = store.get('known', {}), s = sel) => { setDeck(buildDeck(lessonsFor(s), kn)); setI(0); setFlip(false); };
-  useEffect(() => { rebuild(); }, [sel]); // eslint-disable-line react-hooks/exhaustive-deps
+  const rebuild = (kn = store.get('known', {}), s = sel) => { setDeck(buildDeck(lessonsFor(s, isOpen), kn)); setI(0); setFlip(false); };
+  useEffect(() => { rebuild(); }, [sel, openKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const total = deck.length;
   const ids = new Set(deck.map((c) => c.k));

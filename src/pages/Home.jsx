@@ -4,6 +4,8 @@ import { LESSONS, MODES, PAST } from '../data';
 import { store } from '../lib/store';
 import { arN } from '../lib/util';
 import { ThemeButton } from '../components/ui';
+import { useAccess } from '../lib/accessStore';
+import { LockMark } from '../components/Lock';
 
 const TILES = [
   { mode: 'learn', icon: BookOpen, tint: 'bg-brand-50 text-brand-600', tag: 'خريطة ذهنية وشرح لكل درس' },
@@ -11,7 +13,7 @@ const TILES = [
   { mode: 'mnem', icon: KeyRound, tint: 'bg-amber-50 text-amber-700', tag: 'جمل تحفظ بها القواعد' },
   { mode: 'quiz', icon: ListChecks, tint: 'bg-emerald-50 text-emerald-700', tag: 'اختيار من متعدد' },
   { mode: 'essay', icon: PenLine, tint: 'bg-violet-50 text-violet-700', tag: 'اكتب مع المؤقت' },
-  { mode: 'gallery', icon: Image, tint: 'bg-rose-50 text-rose-700', tag: `${arN(LESSONS.reduce((n, s) => n + (s.figs?.length || 0), 0))} صورة: مخارج، صفات، مدود` },
+  { mode: 'gallery', icon: Image, tint: 'bg-rose-50 text-rose-700', tag: `${arN(LESSONS.reduce((n, s) => n + (s.figs?.length || 0), 0))} رسمًا تفاعليًا: مخارج، صفات، مدود` },
   { mode: 'past', icon: ClipboardList, tint: 'bg-orange-50 text-orange-700', tag: `${arN(PAST.reduce((n, t) => n + t.items.length, 0))} سؤالًا مرتبة حسب النوع` },
 ];
 
@@ -27,6 +29,7 @@ function Ring({ pct }) {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { isOpen } = useAccess();
   const known = store.get('known', {});
   const total = LESSONS.reduce((n, s) => n + s.flash.length, 0);
   const k = Object.keys(known).length;
@@ -93,7 +96,7 @@ export default function Home() {
                     <span className="block font-ui font-bold">{s.title}</span>
                     <span className="block text-xs text-muted truncate font-ui">{s.en} · {arN(kn)}/{arN(s.flash.length)} بطاقة</span>
                   </span>
-                  <ChevronLeft size={20} className="text-muted shrink-0" />
+                  {isOpen(s.id) ? <ChevronLeft size={20} className="text-muted shrink-0" /> : <LockMark />}
                 </button>
               );
             })}

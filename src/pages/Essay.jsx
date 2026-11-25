@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Eye, Timer } from 'lucide-react';
 import { EXTRA, MODES, lessonsFor } from '../data';
 import { Html, Page, TopBar } from '../components/ui';
 import LessonChips, { useLessonSel } from '../components/LessonChips';
+import { useAccess } from '../lib/accessStore';
 import { store } from '../lib/store';
 import { arN, fmtTime, keyPoints, stripTags, wordCount } from '../lib/util';
 
@@ -21,7 +22,8 @@ function useTimer() {
 
 export default function Essay() {
   const [sel, setSel] = useLessonSel();
-  const eqs = useMemo(() => lessonsFor(sel).flatMap((s) => s.essays.map(([q, a]) => ({ q, a, c: s.color, t: s.title, id: s.id }))), [sel]);
+  const { isOpen, openKey } = useAccess();
+  const eqs = useMemo(() => lessonsFor(sel, isOpen).flatMap((s) => s.essays.map(([q, a]) => ({ q, a, c: s.color, t: s.title, id: s.id }))), [sel, openKey]);
   const [ei, setEi] = useState(() => Math.min(store.get('ei_' + sel, 0), eqs.length - 1));
   const idx = Math.min(Math.max(ei, 0), eqs.length - 1);
   const e = eqs[idx];

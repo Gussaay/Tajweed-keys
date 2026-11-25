@@ -38,7 +38,7 @@ const PAST = buildPast();
 export { LESSONS, EXTRA, PAST, FINALS };
 export { default as DIAGRAMS } from './diagrams.json';
 export const lessonById = (id) => LESSONS.find((s) => s.id === id);
-export const lessonsFor = (sel) => (sel === 'all' ? LESSONS : LESSONS.filter((s) => s.id === sel));
+export const lessonsFor = (sel, isOpen = () => true) => (sel === 'all' ? LESSONS : LESSONS.filter((s) => s.id === sel)).filter((s) => isOpen(s.id));
 
 export const MODES = {
   learn: { path: '/learn', title: 'الشرح المبسّط', short: 'الشرح',
