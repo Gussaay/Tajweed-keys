@@ -9,6 +9,7 @@ import Mnemonics from './pages/Mnemonics';
 import Quiz from './pages/Quiz';
 import Essay from './pages/Essay';
 import Past from './pages/Past';
+import Gallery from './pages/Gallery';
 
 export default function App() {
   const { pathname } = useLocation();
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/essay" element={<Essay />} />
         <Route path="/past" element={<Past />} />
+        <Route path="/gallery" element={<Gallery />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />

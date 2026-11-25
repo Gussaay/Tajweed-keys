@@ -6,14 +6,14 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { App as CapApp } from '@capacitor/app';
 import { registerSW } from 'virtual:pwa-register';
 
-import '@fontsource/cairo/arabic-500.css';
-import '@fontsource/cairo/arabic-700.css';
-import '@fontsource/cairo/arabic-800.css';
-import '@fontsource/noto-naskh-arabic/arabic-400.css';
-import '@fontsource/noto-naskh-arabic/arabic-700.css';
-import '@fontsource/amiri/arabic-400.css';
-import '@fontsource/amiri/arabic-700.css';
-import '@fontsource/amiri-quran/arabic-400.css';
+import '@fontsource/cairo/500.css';
+import '@fontsource/cairo/700.css';
+import '@fontsource/cairo/800.css';
+import '@fontsource/noto-naskh-arabic/400.css';
+import '@fontsource/noto-naskh-arabic/700.css';
+import '@fontsource/amiri/400.css';
+import '@fontsource/amiri/700.css';
+import '@fontsource/amiri-quran/400.css';
 import './index.css';
 import App from './App';
 

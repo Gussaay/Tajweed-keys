@@ -2,6 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { LESSONS, lessonById } from '../data';
 import { Html, Page, TopBar } from '../components/ui';
+import { FigureGrid } from '../components/Figures';
 
 export default function Lesson() {
   const { id } = useParams();
@@ -21,6 +22,9 @@ export default function Lesson() {
           </div>
           <Html className="intro" html={s.intro} />
           <div className="card"><h3>خريطة الدرس</h3><Html className="figure" html={s.diagram} /></div>
+          {s.figs?.length > 0 && (
+            <div className="card"><h3>الرسوم التوضيحية ({s.figs.length.toLocaleString('ar-EG')})</h3><FigureGrid items={s.figs} /></div>
+          )}
           {s.blocks.map(([t, b], k) => (
             <div className="card" key={k}><Html as="h3" html={t} /><Html className="scroll" html={b} /></div>
           ))}

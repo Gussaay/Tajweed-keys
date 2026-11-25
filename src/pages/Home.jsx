@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronLeft, ClipboardList, FileDown, KeyRound, Layers, ListChecks, PenLine } from 'lucide-react';
+import { BookOpen, ChevronLeft, ClipboardList, FileDown, Image, KeyRound, Layers, ListChecks, PenLine } from 'lucide-react';
 import { LESSONS, MODES, PAST } from '../data';
 import { store } from '../lib/store';
 import { arN } from '../lib/util';
@@ -11,6 +11,7 @@ const TILES = [
   { mode: 'mnem', icon: KeyRound, tint: 'bg-amber-50 text-amber-700', tag: 'جمل تحفظ بها القواعد' },
   { mode: 'quiz', icon: ListChecks, tint: 'bg-emerald-50 text-emerald-700', tag: 'اختيار من متعدد' },
   { mode: 'essay', icon: PenLine, tint: 'bg-violet-50 text-violet-700', tag: 'اكتب مع المؤقت' },
+  { mode: 'gallery', icon: Image, tint: 'bg-rose-50 text-rose-700', tag: `${arN(LESSONS.reduce((n, s) => n + (s.figs?.length || 0), 0))} صورة: مخارج، صفات، مدود` },
   { mode: 'past', icon: ClipboardList, tint: 'bg-orange-50 text-orange-700', tag: `${arN(PAST.reduce((n, t) => n + t.items.length, 0))} سؤالًا مرتبة حسب النوع` },
 ];
 
@@ -48,7 +49,7 @@ export default function Home() {
             <img src="icon-192.png" alt="" className="h-12 w-12 rounded-xl shrink-0 shadow-md" />
             <div className="flex-1 min-w-0">
               <p className="font-ui font-bold text-base leading-tight">رواية حفص عن عاصم</p>
-              <p className="text-white/85 text-sm leading-snug">ثمانية دروس، بطاقات، اختبارات، وأسئلة الاختبارات السابقة</p>
+              <p className="text-white/85 text-sm leading-snug">سبعة عشر درسًا، رسوم توضيحية، بطاقات، اختبارات، وأسئلة سابقة</p>
               <p className="text-white/90 text-xs mt-1 font-ui">
                 {arN(k)} من {arN(total)} بطاقة محفوظة{best ? ` · أفضل نتيجة في الاختبار ${arN(best)}` : ''}
               </p>

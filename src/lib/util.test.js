@@ -25,8 +25,10 @@ test('deck puts unknown cards first', () => {
   assert.equal(deck.length, lessons.reduce((n, s) => n + s.flash.length, 0));
   assert.equal(deck[deck.length - 1].k, 'hamz:0');
 });
-test('content is complete: 8 lessons, 7 past-exam types', () => {
-  assert.equal(lessons.length, 8);
+test('content is complete: 17 lessons, 7 past-exam types, figures exist', () => {
+  assert.equal(lessons.length, 17);
+  for (const s of lessons) for (const [f] of s.figs || []) assert.ok(fs.existsSync(new URL('../../public/figs/' + f, import.meta.url)), f);
+  assert.equal(new Set(lessons.map((s) => s.id)).size, lessons.length);
   assert.ok(lessons.some((s) => s.id === 'nabr'));
   assert.equal(past.length, 7);
   for (const s of lessons) {
