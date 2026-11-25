@@ -2,7 +2,7 @@
 // organ diagram whose zones can be tapped, and a meter that counts harakat.
 import { useEffect, useRef, useState } from 'react';
 import { canSpeak, speak, letterSound, meter, stopMeter, canMeter } from '../lib/sound';
-import Mouth, { ZONE_LETTERS, ZONE_NAMES } from './Mouth';
+import Head, { HEAD_ZONES, ZONE_LETTERS } from './Head';
 import { Html } from './ui';
 
 const AR = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]);
@@ -25,15 +25,15 @@ export function LetterChips({ l }) {
 }
 
 // The speech organs; tapping a zone shows (and lets you hear) its letters.
-export function MouthPicker({ hl, marks }) {
+export function MouthPicker({ hl, marks, ...pose }) {
   const [sel, setSel] = useState(null);
   const info = sel && ZONE_LETTERS[sel];
   return (
     <>
-      <Mouth hl={hl} marks={marks} sel={sel} onPick={(k) => setSel(k === sel ? null : k)} />
+      <Head hl={hl} marks={marks} {...pose} sel={sel} onPick={(k) => setSel(k === sel ? null : k)} />
       {info ? (
         <div className="dg-zone">
-          <div className="dg-zone-h">{ZONE_NAMES[sel]}<button type="button" className="dg-x" aria-label="إغلاق" onClick={() => setSel(null)}>×</button></div>
+          <div className="dg-zone-h">{HEAD_ZONES[sel].name}<button type="button" className="dg-x" aria-label="إغلاق" onClick={() => setSel(null)}>×</button></div>
           <LetterChips l={info.l} />
           <Html className="dg-zone-d" html={info.d} />
           {info.madd && <MaddMeter opts={[{ l: 'المد الطبيعي', n: 2 }]} compact />}
