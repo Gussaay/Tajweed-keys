@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { arN, shuffle, keyPoints, wordCount, fmtTime, buildDeck } from './util.js';
 import fs from 'node:fs';
 
-const lessons = JSON.parse(fs.readFileSync(new URL('../data/lessons.json', import.meta.url)));
-const past = JSON.parse(fs.readFileSync(new URL('../data/past.json', import.meta.url)));
+const lessons = JSON.parse(fs.readFileSync(new URL('../../content/lessons.json', import.meta.url)));
+const past = JSON.parse(fs.readFileSync(new URL('../../content/past.json', import.meta.url)));
 
 test('arabic digits', () => assert.equal(arN(2026), '٢٠٢٦'));
 test('shuffle keeps every item', () => {
@@ -36,7 +36,7 @@ test('content is complete: 17 lessons, 7 base past-exam types', () => {
   }
 });
 test('final exams: two papers of 7 questions, valid categories', () => {
-  const finals = JSON.parse(fs.readFileSync(new URL('../data/finals.json', import.meta.url)));
+  const finals = JSON.parse(fs.readFileSync(new URL('../../content/finals.json', import.meta.url)));
   assert.deepEqual(finals.map((f) => f.id), ['f14', 'f13']);
   const cats = new Set(['def', 'fill', 'tf', 'harf', 'alaqa', 'extract']);
   for (const f of finals) {

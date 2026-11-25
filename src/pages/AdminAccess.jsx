@@ -133,7 +133,7 @@ function Settings({ raw, run }) {
         <textarea className="field" rows={4} value={f.pay_info} onChange={(e) => put('pay_info')(e.target.value)} />
       </label>
       <button className="btn pri w-full mt-3" onClick={() => run(async () => {
-        await set(ref(db, 'access_config'), { ...f, trial_days: Number(f.trial_days) || 3, pro_days: Number(f.pro_days) || 365 });
+        await set(ref(db, 'access_config'), { ...f, free: Object.fromEntries(f.free.map((id) => [id, true])), trial_days: Number(f.trial_days) || 3, pro_days: Number(f.pro_days) || 365 });
         return 'حُفظت الإعدادات.';
       })}>احفظي الإعدادات</button>
     </div>

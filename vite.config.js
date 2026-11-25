@@ -32,13 +32,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Everything (lessons are bundled) works offline after the first visit.
+        // The app shell works offline; lessons are cached by lib/content.js.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        runtimeCaching: [
-          { urlPattern: /\.pdf$/, handler: 'CacheFirst', options: { cacheName: 'pdf', expiration: { maxEntries: 2 } } },
-        ],
       },
     }),
   ],

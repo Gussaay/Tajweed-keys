@@ -30,7 +30,9 @@ export const DEFAULT_CONFIG = {
 
 const isTrue = (v) => v === true || v === 'true';
 const num = (v, d) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Math.round(Number(v)) : d);
-const list = (v) => (Array.isArray(v) ? v : v && typeof v === 'object' ? Object.keys(v).filter((k) => v[k]) : null);
+// free is stored as { id: true }; an older save may hold { 0: 'id', ... }.
+const list = (v) => (Array.isArray(v) ? v : v && typeof v === 'object'
+  ? Object.entries(v).map(([k, x]) => (x === true ? k : typeof x === 'string' ? x : null)).filter(Boolean) : null);
 
 export function readConfig(raw) {
   const c = raw || {};

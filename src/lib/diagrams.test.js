@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const D = JSON.parse(readFileSync(new URL('../data/diagrams.json', import.meta.url)));
-const L = JSON.parse(readFileSync(new URL('../data/lessons.json', import.meta.url)));
+const D = JSON.parse(readFileSync(new URL('../../content/diagrams.json', import.meta.url)));
+const L = JSON.parse(readFileSync(new URL('../../content/lessons.json', import.meta.url)));
 const TYPES = { def: 'rows', list: 'items', table: 'rows', compare: 'cols', tree: 'root', radial: 'items', steps: 'items', letters: 'groups', words: 'items', mouth: 'hl', madd: 'opts' };
 const ZONES = ['khayshum', 'hanak', 'jawf', 'shafatan', 'asnan', 'taraf-lisan', 'wasat-lisan', 'aqsa-lisan', 'hafa-lisan', 'adna-halq', 'wasat-halq', 'aqsa-halq'];
 const figs = new Set(L.flatMap((s) => (s.figs || []).map((f) => f[0])));

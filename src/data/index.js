@@ -1,9 +1,29 @@
-import { CONTENT } from './content';
+// The study content is not part of the app: it lives in the Firebase database
+// (scripts/build-db.mjs) and lib/content.js loads it after sign-in, only the
+// lessons this person may open. These bindings are filled by setContent();
+// before that they are empty. A locked lesson is a summary with empty lists
+// (`locked: true`); `counts` always gives the full lesson's sizes.
+export let LESSONS = [];
+export let EXTRA = [];
+export let PAST = [];
+export let FINALS = [];
+export let DIAGRAMS = {};
 
-const LESSONS = CONTENT.lessons;
-const EXTRA = CONTENT.extra;
-const PAST_BASE = CONTENT.past;
-const FINALS = CONTENT.finals;
+const EMPTY = { blocks: [], mnemonics: [], essays: [], flash: [], quiz: [], figs: [], diagram: '' };
+
+export function setContent({ catalog, lessons = {}, exams = null }) {
+  const dg = {};
+  LESSONS = (catalog?.lessons || []).map((m) => {
+    const got = lessons[m.id];
+    if (!got) return { ...EMPTY, ...m, locked: true };
+    Object.assign(dg, got.diagrams || {});
+    return { ...got.lesson, counts: m.counts, locked: false };
+  });
+  DIAGRAMS = dg;
+  EXTRA = catalog?.extra || [];
+  FINALS = exams?.finals || [];
+  PAST = exams ? buildPast(exams.past || [], FINALS) : [];
+}
 
 // The two final exams are stored once, as whole papers (finals.json).
 // Their questions are also merged into the matching question-type tabs,
@@ -14,7 +34,7 @@ const EXTRA_TYPES = {
 };
 const CAT_FOR = { essay: 'def' };
 
-function buildPast() {
+function buildPast(PAST_BASE, FINALS) {
   const types = PAST_BASE.map((t) => ({ ...t, items: [...t.items] }));
   for (const f of FINALS) {
     for (const q of f.qs) {
@@ -34,9 +54,6 @@ function buildPast() {
   return [finals, ...types];
 }
 
-const PAST = buildPast();
-export { LESSONS, EXTRA, PAST, FINALS };
-export { default as DIAGRAMS } from './diagrams.json';
 export const lessonById = (id) => LESSONS.find((s) => s.id === id);
 export const lessonsFor = (sel, isOpen = () => true) => (sel === 'all' ? LESSONS : LESSONS.filter((s) => s.id === sel)).filter((s) => isOpen(s.id));
 

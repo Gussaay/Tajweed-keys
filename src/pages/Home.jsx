@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronLeft, CircleUserRound, ClipboardList, FileDown, Image, KeyRound, Layers, ListChecks, PenLine } from 'lucide-react';
+import { BookOpen, ChevronLeft, CircleUserRound, ClipboardList, Image, KeyRound, Layers, ListChecks, PenLine } from 'lucide-react';
 import { LESSONS, MODES, PAST } from '../data';
 import { store } from '../lib/store';
 import { arN } from '../lib/util';
@@ -7,14 +7,14 @@ import { ThemeButton } from '../components/ui';
 import { useAccess } from '../lib/accessStore';
 import { LockMark } from '../components/Lock';
 
-const TILES = [
+const tiles = () => [
   { mode: 'learn', icon: BookOpen, tint: 'bg-brand-50 text-brand-600', tag: 'خريطة ذهنية وشرح لكل درس' },
   { mode: 'cards', icon: Layers, tint: 'bg-sky-50 text-sky-700', tag: 'اقلب وقيّم نفسك' },
   { mode: 'mnem', icon: KeyRound, tint: 'bg-amber-50 text-amber-700', tag: 'جمل تحفظ بها القواعد' },
   { mode: 'quiz', icon: ListChecks, tint: 'bg-emerald-50 text-emerald-700', tag: 'اختيار من متعدد' },
   { mode: 'essay', icon: PenLine, tint: 'bg-violet-50 text-violet-700', tag: 'اكتب مع المؤقت' },
-  { mode: 'gallery', icon: Image, tint: 'bg-rose-50 text-rose-700', tag: `${arN(LESSONS.reduce((n, s) => n + (s.figs?.length || 0), 0))} رسمًا تفاعليًا: مخارج، صفات، مدود` },
-  { mode: 'past', icon: ClipboardList, tint: 'bg-orange-50 text-orange-700', tag: `${arN(PAST.reduce((n, t) => n + t.items.length, 0))} سؤالًا مرتبة حسب النوع` },
+  { mode: 'gallery', icon: Image, tint: 'bg-rose-50 text-rose-700', tag: `${arN(LESSONS.reduce((n, s) => n + (s.counts?.figs || 0), 0))} رسمًا تفاعليًا: مخارج، صفات، مدود` },
+  { mode: 'past', icon: ClipboardList, tint: 'bg-orange-50 text-orange-700', tag: (PAST.length ? `${arN(PAST.reduce((n, t) => n + t.items.length, 0))} سؤالًا مرتبة حسب النوع` : 'للمشتركات: الاختبارات النهائية والسابقة') },
 ];
 
 function Ring({ pct }) {
@@ -31,7 +31,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { isOpen } = useAccess();
   const known = store.get('known', {});
-  const total = LESSONS.reduce((n, s) => n + s.flash.length, 0);
+  const total = LESSONS.reduce((n, s) => n + (s.counts?.flash || 0), 0);
   const k = Object.keys(known).length;
   const pct = total ? Math.min(1, k / total) : 0;
   const best = store.get('best_all', 0);
@@ -72,7 +72,7 @@ export default function Home() {
         <section>
           <h2 className="font-ui font-bold text-lg mb-2">ماذا تريد أن تذاكر؟</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {TILES.map(({ mode, icon: Icon, tint, tag }) => (
+            {tiles().map(({ mode, icon: Icon, tint, tag }) => (
               <button key={mode} onClick={() => navigate(MODES[mode].path)}
                 className="surface text-right rounded-2xl p-4 transition active:scale-[0.98] hover:shadow-md">
                 <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${tint}`}><Icon size={24} /></div>
@@ -94,7 +94,7 @@ export default function Home() {
                   <span className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center text-white font-display text-xl font-bold" style={{ background: s.color }}>{s.num}</span>
                   <span className="flex-1 min-w-0">
                     <span className="block font-ui font-bold">{s.title}</span>
-                    <span className="block text-xs text-muted truncate font-ui">{s.en} · {arN(kn)}/{arN(s.flash.length)} بطاقة</span>
+                    <span className="block text-xs text-muted truncate font-ui">{s.en} · {arN(kn)}/{arN(s.counts?.flash || 0)} بطاقة</span>
                   </span>
                   {isOpen(s.id) ? <ChevronLeft size={20} className="text-muted shrink-0" /> : <LockMark />}
                 </button>
@@ -103,15 +103,6 @@ export default function Home() {
           </div>
         </section>
 
-        <a href="tajweed-keys-summary.pdf" target="_blank" rel="noopener"
-          className="surface flex items-center gap-3 rounded-2xl p-3 transition hover:shadow-md">
-          <span className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center bg-red-50 text-red-600"><FileDown size={22} /></span>
-          <span className="flex-1 min-w-0">
-            <span className="block font-ui font-bold">الملخص المطبوع (PDF)</span>
-            <span className="block text-xs text-muted font-ui">مفاتيح التجويد: الدروس والمخططات والاختبارات السابقة</span>
-          </span>
-          <ChevronLeft size={20} className="text-muted shrink-0" />
-        </a>
         <p className="text-center stat pt-2">الإصدار {arN(import.meta.env.VITE_APP_VERSION)}</p>
       </main>
     </div>

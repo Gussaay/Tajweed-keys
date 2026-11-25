@@ -100,13 +100,13 @@ export default function Past() {
   const choose = (id) => { setPtype(id); setOpen({}); setTf({}); };
   const all = (v) => setOpen(v ? Object.fromEntries(t.items.map((_, i) => [i, true])) : {});
   const tfN = Object.keys(tf).length;
-  const tfR = t.kind === 'tf' ? Object.entries(tf).filter(([i, v]) => !!t.items[i]?.[1] === v).length : 0;
+  const tfR = t?.kind === 'tf' ? Object.entries(tf).filter(([i, v]) => !!t.items[i]?.[1] === v).length : 0;
   const { acc } = useAccess();
-  if (!acc.full) {
+  if (!acc.full || !t) {
     return (
       <>
         <TopBar title={MODES.past.title} sub={MODES.past.sub} back={false} />
-        <Page><LockedNotice title="الاختبارات السابقة للمشتركات" /></Page>
+        <Page>{acc.full ? <div className="card text-center"><p className="stat">جارٍ تحميل الاختبارات…</p><div className="spinner" /></div> : <LockedNotice title="الاختبارات السابقة للمشتركات" />}</Page>
       </>
     );
   }

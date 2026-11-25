@@ -1,6 +1,5 @@
-// Small banners above the bottom bar: new content downloaded, new APK out.
+// Small banner above the bottom bar when a new APK is out.
 import { useState } from 'react';
-import { contentStatus } from '../lib/remoteContent';
 import { updateStatus } from '../lib/updates';
 import { useExternal } from '../lib/useExternal';
 import { openExternal } from '../lib/openUrl';
@@ -18,17 +17,8 @@ function Bar({ children, onClose }) {
 }
 
 export default function UpdateBanner() {
-  const c = useExternal(contentStatus);
   const u = useExternal(updateStatus);
   const [hide, setHide] = useState({});
-  if (c.fresh && !hide.content) {
-    return (
-      <Bar onClose={() => setHide((h) => ({ ...h, content: true }))}>
-        <span className="font-bold">وصل محتوى جديد.</span>{' '}
-        <button className="btn pri mr-1" onClick={() => window.location.reload()}>اعرضيه الآن</button>
-      </Bar>
-    );
-  }
   if (u.apk && !hide.apk) {
     return (
       <Bar onClose={() => setHide((h) => ({ ...h, apk: true }))}>

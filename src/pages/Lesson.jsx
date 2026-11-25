@@ -19,6 +19,14 @@ export default function Lesson() {
       </>
     );
   }
+  if (s.locked) {
+    return (
+      <>
+        <TopBar title={`${s.num}. ${s.title}`} />
+        <Page><div className="card text-center"><p className="stat">جارٍ تحميل الدرس…</p><div className="spinner" /></div></Page>
+      </>
+    );
+  }
   const i = LESSONS.indexOf(s);
   const prev = LESSONS[i - 1], next = LESSONS[i + 1];
   // Each illustration carries the index of the section it belongs to (-1: overview).

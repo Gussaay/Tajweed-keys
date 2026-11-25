@@ -24,7 +24,7 @@ export default function Learn() {
             </div>
             <Html className="px-4 py-3 text-[15px] line-clamp-3" html={s.intro} />
             <p className="px-4 pb-3 stat">
-              {arN(s.blocks.length + 2)} أقسام · {arN(s.mnemonics.length)} مفاتيح حفظ · {arN(s.essays.length)} أسئلة مقالية · {arN(s.flash.length)} بطاقة
+              {arN(s.counts.blocks + 2)} أقسام · {arN(s.counts.mnemonics)} مفاتيح حفظ · {arN(s.counts.essays)} أسئلة مقالية · {arN(s.counts.flash)} بطاقة
             </p>
           </Link>
         ))}

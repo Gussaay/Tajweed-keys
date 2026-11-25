@@ -10,7 +10,8 @@ name: Build web and Android APK
 #      together with:
 #        /latest/update.json + zip  over-the-air update for installed apps
 #        /native-version.json       newest APK, so old apps offer the download
-#   3. deploys the database rules (database.rules.json).
+#   3. before the web deploy: the database rules and the study content
+#      (content/*.json via scripts/build-db.mjs; the app has no lessons inside).
 
 on:
   push:
@@ -164,6 +165,18 @@ jobs:
           name: tajweed-keys-apk
           path: apk
       - run: cp apk/native-version.json dist/native-version.json
+      # The lessons live in the database, not in the app: upload them (and the
+      # rules that decide who may read each lesson) before the new web code.
+      - name: Deploy database rules and content
+        if: env.FIREBASE_SERVICE_ACCOUNT != ''
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          node scripts/build-db.mjs "$RUNNER_TEMP/dbcontent.json"
+          npx -y firebase-tools@14 deploy --only database --project tajweed-24716 --non-interactive
+          npx -y firebase-tools@14 database:update / "$RUNNER_TEMP/dbcontent.json" \
+            --project tajweed-24716 --instance tajweed-24716-default-rtdb --force --non-interactive
+          rm -f "$RUNNER_TEMP/sa.json"
       - name: Deploy to Firebase Hosting
         if: env.FIREBASE_SERVICE_ACCOUNT != ''
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -172,18 +185,6 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TAJWEED }}
           projectId: tajweed-24716
           channelId: live
-      # Needs the service account to have a database role (Firebase Realtime
-      # Database Admin). If it does not, paste database.rules.json into
-      # Firebase console > Realtime Database > Rules instead.
-      - name: Deploy database rules
-        if: env.FIREBASE_SERVICE_ACCOUNT != ''
-        continue-on-error: true
-        run: |
-          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
-          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx -y firebase-tools@14 deploy --only database --project tajweed-24716 --non-interactive \
-            || echo "::warning::Database rules were not deployed. Paste database.rules.json in the Firebase console."
-          rm -f "$RUNNER_TEMP/sa.json"
       - name: Secret missing
         if: env.FIREBASE_SERVICE_ACCOUNT == ''
         run: echo "::warning::Add the FIREBASE_SERVICE_ACCOUNT_TAJWEED secret to deploy to https://tajweed-24716.web.app"

@@ -1,7 +1,17 @@
 {
   "rules": {
-    "content": {
-      ".read": true,
+    "catalog": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "lesson": {
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$id": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('access_config').child('enabled').val() === false || (root.child('access').child(auth.uid).child('role').val() === 'pro' && (!root.child('access').child(auth.uid).child('pro_until').exists() || root.child('access').child(auth.uid).child('pro_until').val() > now)) || root.child('access').child(auth.uid).child('trial').child('end').val() > now || root.child('access_config').child('free').child($id).val() === true || (!root.child('access_config').child('free').exists() && ($id === 'hamz' || $id === 'muqaddima')) || (root.child('access').child(auth.uid).child('unlocks').child($id).exists() && (!root.child('access').child(auth.uid).child('unlocks').child($id).child('until').exists() || root.child('access').child(auth.uid).child('unlocks').child($id).child('until').val() > now)))"
+      }
+    },
+    "exams": {
+      ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('access_config').child('enabled').val() === false || (root.child('access').child(auth.uid).child('role').val() === 'pro' && (!root.child('access').child(auth.uid).child('pro_until').exists() || root.child('access').child(auth.uid).child('pro_until').val() > now)) || root.child('access').child(auth.uid).child('trial').child('end').val() > now)",
       ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
     },
     "update": {

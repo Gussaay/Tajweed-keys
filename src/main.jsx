@@ -17,7 +17,6 @@ import '@fontsource/amiri-quran/400.css';
 import './index.css';
 import App from './App';
 import { startSync } from './lib/sync';
-import { startContentSync } from './lib/remoteContent';
 import { startUpdates } from './lib/updates';
 
 if (Capacitor.isNativePlatform()) {
@@ -33,9 +32,8 @@ if (Capacitor.isNativePlatform()) {
   registerSW({ immediate: true });
 }
 
-// Account progress, published content and (in the APK) app updates.
+// Account progress and (in the APK) app updates. Lessons load after sign-in (App).
 startSync();
-startContentSync();
 startUpdates();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
